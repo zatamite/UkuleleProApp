@@ -13,14 +13,11 @@ struct UkuleleProApp: App {
     }
     
     private func requestMicrophonePermission() {
-        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+        AVAudioApplication.requestRecordPermission { granted in
             if granted {
-                print("Microphone permission granted")
                 DispatchQueue.main.async {
                     AudioManager.shared.start()
                 }
-            } else {
-                print("Microphone permission denied")
             }
         }
     }

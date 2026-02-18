@@ -129,13 +129,10 @@ class ChordEngine: ObservableObject {
     
     // MARK: - DSP Math
     private func computeFFT(_ buffer: [Float]) -> [Float] {
-        // Simple Magnitude FFT using vDSP
         var real = buffer
         var imaginary = [Float](repeating: 0.0, count: buffer.count)
-        var splitComplex = DSPSplitComplex(realp: &real, imagp: &imaginary)
         
         let length = vDSP_Length(log2(Float(buffer.count)))
-        let start = Int(length)
         let fftSetup = vDSP_create_fftsetup(length, FFTRadix(kFFTRadix2))!
         
         // Windowing (Hanning) to reduce leakage
@@ -143,18 +140,18 @@ class ChordEngine: ObservableObject {
         vDSP_hann_window(&window, vDSP_Length(buffer.count), Int32(vDSP_HANN_NORM))
         vDSP_vmul(real, 1, window, 1, &real, 1, vDSP_Length(buffer.count))
         
-        // Perform FFT
-        vDSP_fft_zip(fftSetup, &splitComplex, 1, length, FFTDirection(FFT_FORWARD))
-        
-        // Compute Magnitudes
+        // Compute Magnitudes — use withUnsafeMutableBufferPointer so pointers outlive the call
         var magnitudes = [Float](repeating: 0.0, count: buffer.count / 2)
-        vDSP_zvmags(&splitComplex, 1, &magnitudes, 1, vDSP_Length(buffer.count / 2))
+        real.withUnsafeMutableBufferPointer { realPtr in
+            imaginary.withUnsafeMutableBufferPointer { imagPtr in
+                var splitComplex = DSPSplitComplex(realp: realPtr.baseAddress!, imagp: imagPtr.baseAddress!)
+                vDSP_fft_zip(fftSetup, &splitComplex, 1, length, FFTDirection(FFT_FORWARD))
+                vDSP_zvmags(&splitComplex, 1, &magnitudes, 1, vDSP_Length(buffer.count / 2))
+            }
+        }
         
-        // Clean up
         vDSP_destroy_fftsetup(fftSetup)
         
-        // Normalize (optional, but good for display)
-        // Applying sqrt to magnitude gives closer to "loudness" perception (energy -> amplitude)
         var normalized = [Float](repeating: 0.0, count: magnitudes.count)
         var count = Int32(magnitudes.count)
         vvsqrtf(&normalized, magnitudes, &count)
@@ -236,7 +233,16 @@ class ChordEngine: ObservableObject {
             // Extensions (Simplified)
             ("6",       [0, 4, 7, 9],    [10]),         // Major 6 (Avoid m7)
             ("m6",      [0, 3, 7, 9],    [4, 10]),      // Minor 6 (Avoid M3, m7)
-            ("add9",    [0, 4, 7, 2],    [3, 10, 11])   // Add9 (Treat 9 as 2)
+            ("add9",    [0, 4, 7, 2],    [3, 10, 11]),  // Add9 (Treat 9 as 2)
+            
+            // Extended (4-string voicings — 5th dropped)
+            ("9",       [0, 4, 10, 2],   [11]),         // Dom9: Root, M3, m7, M9 (no 5th)
+            ("maj9",    [0, 4, 11, 2],   [10]),         // Maj9: Root, M3, M7, M9 (no 5th)
+            ("m9",      [0, 3, 10, 2],   [4, 11]),      // Min9: Root, m3, m7, M9 (no 5th)
+            ("11",      [0, 10, 2, 5],   [4]),          // Dom11: Root, m7, M9, P11 (no 3rd/5th)
+            ("m11",     [0, 3, 10, 5],   [4]),          // Min11: Root, m3, m7, P11
+            ("13",      [0, 4, 10, 9],   [11]),         // Dom13: Root, M3, m7, M13 (no 5th/9th)
+            ("maj13",   [0, 4, 11, 9],   [10])          // Maj13: Root, M3, M7, M13
         ]
         
         // Generate for all 12 roots

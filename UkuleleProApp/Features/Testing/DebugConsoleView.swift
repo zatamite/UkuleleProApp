@@ -60,7 +60,7 @@ struct DebugConsoleView: View {
                     }
                     .frame(height: 200)
                     .background(Color.black.opacity(0.9))
-                    .onChange(of: logger.logs.count) { _ in
+                    .onChange(of: logger.logs.count) { _, _ in
                         if let last = logger.logs.last {
                             withAnimation {
                                 proxy.scrollTo(last.id, anchor: .bottom)
