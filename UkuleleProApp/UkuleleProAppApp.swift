@@ -1,17 +1,27 @@
-//
-//  UkuleleProAppApp.swift
-//  UkuleleProApp
-//
-//  Created by Peter Farell on 2/18/26.
-//
-
 import SwiftUI
+import AVFoundation
 
 @main
-struct UkuleleProAppApp: App {
+struct UkuleleProApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    requestMicrophonePermission()
+                }
+        }
+    }
+    
+    private func requestMicrophonePermission() {
+        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+            if granted {
+                print("Microphone permission granted")
+                DispatchQueue.main.async {
+                    AudioManager.shared.start()
+                }
+            } else {
+                print("Microphone permission denied")
+            }
         }
     }
 }

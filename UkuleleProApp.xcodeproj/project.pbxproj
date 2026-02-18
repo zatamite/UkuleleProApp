@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1B66AD592F4606C600E3BEF1 /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1B66AD582F4606C600E3BEF1 /* AudioKit */; };
+		1B66AD922F4608E700E3BEF1 /* AudioKitEX in Frameworks */ = {isa = PBXBuildFile; productRef = 1B66AD912F4608E700E3BEF1 /* AudioKitEX */; };
+		1B66AD952F46090000E3BEF1 /* SoundpipeAudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1B66AD942F46090000E3BEF1 /* SoundpipeAudioKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		1B66AD492F46068C00E3BEF1 /* UkuleleProApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UkuleleProApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B66AD592F4606C600E3BEF1 /* AudioKit in Frameworks */,
+				1B66AD922F4608E700E3BEF1 /* AudioKitEX in Frameworks */,
+				1B66AD952F46090000E3BEF1 /* SoundpipeAudioKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +42,7 @@
 			isa = PBXGroup;
 			children = (
 				1B66AD4B2F46068C00E3BEF1 /* UkuleleProApp */,
+				1B66AD8F2F46087300E3BEF1 /* Frameworks */,
 				1B66AD4A2F46068C00E3BEF1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +53,13 @@
 				1B66AD492F46068C00E3BEF1 /* UkuleleProApp.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		1B66AD8F2F46087300E3BEF1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +82,9 @@
 			);
 			name = UkuleleProApp;
 			packageProductDependencies = (
+				1B66AD582F4606C600E3BEF1 /* AudioKit */,
+				1B66AD912F4608E700E3BEF1 /* AudioKitEX */,
+				1B66AD942F46090000E3BEF1 /* SoundpipeAudioKit */,
 			);
 			productName = UkuleleProApp;
 			productReference = 1B66AD492F46068C00E3BEF1 /* UkuleleProApp.app */;
@@ -94,6 +114,11 @@
 			);
 			mainGroup = 1B66AD402F46068C00E3BEF1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1B66AD572F4606C600E3BEF1 /* XCRemoteSwiftPackageReference "AudioKit" */,
+				1B66AD902F4608E700E3BEF1 /* XCRemoteSwiftPackageReference "AudioKitEX" */,
+				1B66AD932F46090000E3BEF1 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1B66AD4A2F46068C00E3BEF1 /* Products */;
 			projectDirPath = "";
@@ -256,6 +281,7 @@
 				DEVELOPMENT_TEAM = 27CD2QJ86A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Needs microphone for tuner and chord detection.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +314,7 @@
 				DEVELOPMENT_TEAM = 27CD2QJ86A;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Needs microphone for tuner and chord detection.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,6 +359,51 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1B66AD572F4606C600E3BEF1 /* XCRemoteSwiftPackageReference "AudioKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AudioKit/AudioKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.6.5;
+			};
+		};
+		1B66AD902F4608E700E3BEF1 /* XCRemoteSwiftPackageReference "AudioKitEX" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AudioKit/AudioKitEX";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.6.2;
+			};
+		};
+		1B66AD932F46090000E3BEF1 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AudioKit/SoundpipeAudioKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1B66AD582F4606C600E3BEF1 /* AudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1B66AD572F4606C600E3BEF1 /* XCRemoteSwiftPackageReference "AudioKit" */;
+			productName = AudioKit;
+		};
+		1B66AD912F4608E700E3BEF1 /* AudioKitEX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1B66AD902F4608E700E3BEF1 /* XCRemoteSwiftPackageReference "AudioKitEX" */;
+			productName = AudioKitEX;
+		};
+		1B66AD942F46090000E3BEF1 /* SoundpipeAudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1B66AD932F46090000E3BEF1 /* XCRemoteSwiftPackageReference "SoundpipeAudioKit" */;
+			productName = SoundpipeAudioKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1B66AD412F46068C00E3BEF1 /* Project object */;
 }

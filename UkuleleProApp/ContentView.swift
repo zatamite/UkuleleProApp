@@ -1,24 +1,30 @@
-//
-//  ContentView.swift
-//  UkuleleProApp
-//
-//  Created by Peter Farell on 2/18/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack(alignment: .bottom) {
+            TabView {
+                TunerView()
+                    .tabItem {
+                        Label("Tuner", systemImage: "tuningfork")
+                    }
+                
+                ChordDetectionView()
+                    .tabItem {
+                        Label("Detect", systemImage: "waveform.path")
+                    }
+                
+            }
+            
+            // Global Debug Overlay
+            DebugConsoleView()
+                .padding(.bottom, 50) // Adjust for tab bar
         }
-        .padding()
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
