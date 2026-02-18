@@ -2,23 +2,16 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView {
-                TunerView()
-                    .tabItem {
-                        Label("Tuner", systemImage: "tuningfork")
-                    }
-                
-                ChordDetectionView()
-                    .tabItem {
-                        Label("Detect", systemImage: "waveform.path")
-                    }
-                
-            }
+        TabView {
+            TunerView()
+                .tabItem {
+                    Label("Tuner", systemImage: "tuningfork")
+                }
             
-            // Global Debug Overlay
-            DebugConsoleView()
-                .padding(.bottom, 50) // Adjust for tab bar
+            ChordDetectionView()
+                .tabItem {
+                    Label("Detect", systemImage: "waveform.path")
+                }
         }
     }
 }
