@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B140FF62F4668FF00B9602B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1B140FF52F4668FF00B9602B /* PrivacyInfo.xcprivacy */; };
 		1B66AD592F4606C600E3BEF1 /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1B66AD582F4606C600E3BEF1 /* AudioKit */; };
 		1B66AD922F4608E700E3BEF1 /* AudioKitEX in Frameworks */ = {isa = PBXBuildFile; productRef = 1B66AD912F4608E700E3BEF1 /* AudioKitEX */; };
 		1B66AD952F46090000E3BEF1 /* SoundpipeAudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1B66AD942F46090000E3BEF1 /* SoundpipeAudioKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1B140FF52F4668FF00B9602B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1B66AD492F46068C00E3BEF1 /* UkuleleProApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UkuleleProApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -44,6 +46,7 @@
 				1B66AD4B2F46068C00E3BEF1 /* UkuleleProApp */,
 				1B66AD8F2F46087300E3BEF1 /* Frameworks */,
 				1B66AD4A2F46068C00E3BEF1 /* Products */,
+				1B140FF52F4668FF00B9602B /* PrivacyInfo.xcprivacy */,
 			);
 			sourceTree = "<group>";
 		};
@@ -134,6 +137,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B140FF62F4668FF00B9602B /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

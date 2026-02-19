@@ -9,10 +9,10 @@ class ChordEngine: ObservableObject {
     @Published var candidates: [(name: String, score: Float)] = []
     
     // Configuration
-    private let fluxThreshold: Float = 0.03 // Sensitivity Up (was 0.05)
-    private let minAmplitude: Float = 0.1   // Minimum volume
-    private let latchDelay: TimeInterval = 0.10 // Faster Snap (was 0.15)
-    private let cooldown: TimeInterval = 0.2    // Faster Recovery (was 0.3)
+    private let fluxThreshold: Float = 0.015 // Much more sensitive (was 0.03)
+    private let minAmplitude: Float = 0.08   // Lower gate for soft playing (was 0.12)
+    private let latchDelay: TimeInterval = 0.20 
+    private let cooldown: TimeInterval = 0.4    
     private let analysisWindowSize = 8192
     
     // State
@@ -24,8 +24,13 @@ class ChordEngine: ObservableObject {
     private var templates: [ChordTemplate] = []
     
     init() {
-        populateBaritoneTemplates()
+        refreshTemplates()
         // Note: Engine starts stopped. View must call start().
+    }
+    
+    func refreshTemplates() {
+        self.templates = generateAllTemplates()
+        LogManager.shared.log("Refreshed \(templates.count) chord templates", source: "ChordEngine", level: .info)
     }
     
     func start() {
@@ -164,26 +169,44 @@ class ChordEngine: ObservableObject {
         let sampleRate = AudioManager.shared.sampleRate
         let binWidth = Float(sampleRate) / Float(analysisWindowSize)
         
-        // Additive Logic: Sum Fundamental + 2nd + 3rd Harmonic
-        // We iterate specifically over musical notes to find their energy
-        
-        // Better: Iterate bins, map to note, add with harmonic weighting?
-        // No, "Additive" means we look for specific signatures.
-        
-        // Let's stick to the robust bin-mapping for now, but weighted by harmonics
-        // Actually, simpler is better for "Studio Analysis".
-        // Let's just map all energy to chroma, but use the high-res to be precise.
-        
-        for (bin, energy) in fft.enumerated() {
-            guard bin > 0 else { continue }
-            let freq = Float(bin) * binWidth
-            guard freq > 60 && freq < 1000 else { continue } // Filter range
-            
-            let noteIndex = freqToNoteIndex(Double(freq))
-            chroma[noteIndex] += energy
+        // 1. Peak Discovery: Find peaks to ignore floor noise
+        var peaks: [(index: Int, val: Float)] = []
+        for i in 2..<(fft.count-2) {
+            if fft[i] > fft[i-1] && fft[i] > fft[i+1] && fft[i] > 0.05 {
+                peaks.append((i, fft[i]))
+            }
         }
         
-        // Normalize
+        // Sort peaks by magnitude and take top 15
+        peaks.sort { $0.val > $1.val }
+        let activePeaks = peaks.prefix(15)
+        
+        // Gaussian Sharpness: 0.15 is much "stickier" and precise than 0.4
+        let sigma: Double = 0.15 
+        
+        for peak in activePeaks {
+            let freq = Float(peak.index) * binWidth
+            guard freq > 60 && freq < 1500 else { continue }
+            
+            let continuousNote = freqToContinuousNote(Double(freq))
+            
+            // Map peak energy with tight Gaussian focus
+            for offset in -1...1 {
+                let noteBucket = (Int(round(continuousNote)) + offset)
+                let distance = Double(noteBucket) - continuousNote
+                let weight = Float(exp(-(distance * distance) / (2 * sigma * sigma)))
+                
+                let normalizedIndex = ((noteBucket % 12) + 12) % 12
+                
+                // Harmonic Dampening: If this is very high up, it's likely a harmonic.
+                // We weight fundamentals (lower notes) more heavily.
+                let frequencyWeight: Float = freq < 500 ? 1.0 : 0.6
+                
+                chroma[normalizedIndex] += peak.val * weight * frequencyWeight
+            }
+        }
+        
+        // Final Normalization
         let maxVal = chroma.max() ?? 1.0
         if maxVal > 0 {
             for i in 0..<12 {
@@ -194,17 +217,13 @@ class ChordEngine: ObservableObject {
         return (chroma, [])
     }
     
-    private func freqToNoteIndex(_ freq: Double) -> Int {
+    private func freqToContinuousNote(_ freq: Double) -> Double {
         guard freq > 0 else { return 0 }
-        let n = 12.0 * log2(freq / 440.0) + 69.0
-        let val = Int(round(n))
-        return ((val % 12) + 12) % 12
+        // Formula: n = 12 * log2(f / 440) + 69
+        return 12.0 * log2(freq / 440.0) + 69.0
     }
     
-    private func populateBaritoneTemplates() {
-        self.templates = generateAllTemplates()
-        LogManager.shared.log("Generated \(templates.count) chord templates", source: "ChordEngine", level: .info)
-    }
+    // Removed tuning-specific population as templates are root-relative
     
     private func generateAllTemplates() -> [ChordTemplate] {
         var generated: [ChordTemplate] = []
@@ -253,14 +272,17 @@ class ChordEngine: ObservableObject {
                 var chroma = [Float](repeating: 0.0, count: 12)
                 var chordNotes: [String] = []
                 
-                // 1. Set Positive Weights
-                for interval in intervals {
-                    let index = (i + interval) % 12
-                    chroma[index] = 1.0
-                    // Add strict weighting for Root and 5th? No, flat is better for generic.
-                    
-                    // Note naming (Simplified)
+                // 1. Set Positive Weights with Music Theory Priority
+                for (index, interval) in intervals.enumerated() {
                     let noteIndex = (i + interval) % 12
+                    
+                    // The Root (Index 0) is the most definitive.
+                    // The 5th (interval 7) is the next most stable.
+                    var weight: Float = 1.0
+                    if index == 0 { weight = 1.3 } // Heavy Root priority
+                    else if interval == 7 { weight = 1.1 } // Strong Fifth
+                    
+                    chroma[noteIndex] = weight
                     chordNotes.append(noteNames[noteIndex])
                 }
                 

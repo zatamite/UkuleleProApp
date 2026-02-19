@@ -65,10 +65,10 @@ class TunerViewModel: ObservableObject {
         // Calculate average
         let smoothedFrequency = pitchBuffer.reduce(0, +) / Double(pitchBuffer.count)
         
-        updateDisplay(frequency: smoothedFrequency)
+        updateDisplay(frequency: smoothedFrequency, amplitude: amplitude)
     }
     
-    private func updateDisplay(frequency: Double) {
+    private func updateDisplay(frequency: Double, amplitude: Float) {
         currentPitch = frequency
         
         // Pitch to Note Formula: n = 12 * log2(f / 440) + 69
@@ -83,6 +83,8 @@ class TunerViewModel: ObservableObject {
         let frequencyForNote = 440.0 * pow(2.0, (Double(noteIndex) - 69.0) / 12.0)
         centsDeviation = 1200.0 * log2(frequency / frequencyForNote)
     }
+    
+    private var lastHapticTime = Date.distantPast
     
     func toggleTuner() {
         if isRunning {

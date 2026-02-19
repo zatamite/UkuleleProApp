@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ChordDetectionView: View {
     @StateObject var viewModel = ChordDetectionViewModel()
+    @ObservedObject var settings = SettingsManager.shared
     
     let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
     
@@ -15,15 +16,59 @@ struct ChordDetectionView: View {
     
     var body: some View {
         ZStack {
-            // Match Tuner's dark background
-            LinearGradient(
-                gradient: Gradient(colors: [Color.black, Color(white: 0.08)]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // Match Tuner's dark background (Dynamic Dark Mode)
+            Color(settings.isDarkMode ? .black : .white)
+                .ignoresSafeArea()
             
-            VStack(spacing: 24) {
+            if settings.isDarkMode {
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.black, Color(white: 0.08)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            }
+            
+            VStack(spacing: 20) {
+                // Header with Tuning Selector
+                HStack(spacing: 12) {
+                    Text("Ukulele Pro")
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(settings.isDarkMode ? .secondary : .gray)
+                    
+                    Button(action: {
+                        settings.isDarkMode.toggle()
+                        settings.triggerHaptic(style: .soft)
+                    }) {
+                        Image(systemName: settings.isDarkMode ? "moon.stars.fill" : "sun.max.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
+                    }
+                    
+                    Spacer()
+                    
+                    Menu {
+                        Picker("Tuning", selection: $viewModel.tuning) {
+                            ForEach(Tuning.allCases, id: \.self) { tuning in
+                                Text(tuning.displayName).tag(tuning)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "tuningfork")
+                            Text(viewModel.tuning.displayName)
+                        }
+                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(8)
+                        .foregroundColor(.blue)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
                 
                 Spacer()
                 
@@ -121,6 +166,29 @@ struct ChordDetectionView: View {
                 .padding(.horizontal, 16)
                 
                 Spacer()
+
+                // Ghost History (Last 4 Chords)
+                if !viewModel.chordHistory.isEmpty {
+                    VStack(spacing: 8) {
+                        Text("LAST CHORDS")
+                            .font(.system(size: 10, weight: .black))
+                            .foregroundColor(.secondary.opacity(0.6))
+                        
+                        HStack(spacing: 15) {
+                            ForEach(viewModel.chordHistory, id: \.self) { chord in
+                                Text(chord)
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundColor(.blue.opacity(0.5))
+                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 12)
+                                    .background(Capsule().fill(Color.blue.opacity(0.1)))
+                                    .transition(.scale.combined(with: .opacity))
+                            }
+                        }
+                    }
+                    .padding(.bottom, 30)
+                    .animation(.spring(), value: viewModel.chordHistory)
+                }
             }
         }
         .onAppear {

@@ -2,16 +2,62 @@ import SwiftUI
 
 struct TunerView: View {
     @StateObject var viewModel = TunerViewModel()
+    @ObservedObject var settings = SettingsManager.shared
     
     var body: some View {
         ZStack {
-            // Background Gradient
-            LinearGradient(gradient: Gradient(colors: [Color.black, Color(white: 0.1)]),
-                           startPoint: .top,
-                           endPoint: .bottom)
+            // Dynamic Background
+            Color(settings.isDarkMode ? .black : .white)
                 .ignoresSafeArea()
             
-            VStack(spacing: 30) {
+            if settings.isDarkMode {
+                LinearGradient(gradient: Gradient(colors: [Color.black, Color(white: 0.1)]),
+                               startPoint: .top,
+                               endPoint: .bottom)
+                    .ignoresSafeArea()
+            }
+            
+            VStack(spacing: 20) {
+                // Header with Tuning Selector
+                HStack(spacing: 12) {
+                    Text("Ukulele Pro")
+                        .font(.system(.subheadline, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(settings.isDarkMode ? .secondary : .gray)
+                    
+                    Button(action: {
+                        settings.isDarkMode.toggle()
+                        settings.triggerHaptic(style: .soft)
+                    }) {
+                        Image(systemName: settings.isDarkMode ? "moon.stars.fill" : "sun.max.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
+                    }
+                    
+                    Spacer()
+                    
+                    Menu {
+                        Picker("Tuning", selection: $viewModel.tuning) {
+                            ForEach(Tuning.allCases, id: \.self) { tuning in
+                                Text(tuning.displayName).tag(tuning)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "tuningfork")
+                            Text(viewModel.tuning.displayName)
+                        }
+                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 10)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(8)
+                        .foregroundColor(.blue)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+
                 // String Reference
                 HStack(spacing: 20) {
                     ForEach(viewModel.tuning.stringNotes, id: \.self) { string in
@@ -22,8 +68,7 @@ struct TunerView: View {
                             .background(Circle().stroke(viewModel.currentNote.starts(with: string.prefix(1)) ? Color.green : Color.secondary.opacity(0.3)))
                     }
                 }
-                .padding(.top, 10)
-                .padding()
+                .padding(.horizontal)
                 
                 // Mode Toggle
                 Picker("Mode", selection: $viewModel.isStrobeMode) {

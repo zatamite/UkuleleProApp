@@ -89,8 +89,10 @@ class AudioManager: ObservableObject {
         guard !isRunning else { return }
         
         do {
-            // 1. Ensure Session is Active
-            try AVAudioSession.sharedInstance().setActive(true)
+            // 1. Reset Session Category (Crucial if Metronome changed it)
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .mixWithOthers])
+            try session.setActive(true)
             
             // 2. Start Engine
             try engine.start()
