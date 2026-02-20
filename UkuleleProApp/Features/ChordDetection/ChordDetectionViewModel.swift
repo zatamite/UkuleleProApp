@@ -8,7 +8,12 @@ class ChordDetectionViewModel: ObservableObject {
     @Published var confidence: Float = 0.0
     @Published var chordHistory: [String] = []
     @Published var chromaVector: [Float] = Array(repeating: 0.0, count: 12)
-    @Published var tuning: Tuning = .tenor
+    @Published var isShowingTuningSheet = false
+    
+    var tuning: Tuning {
+        get { audioManager.tuning }
+        set { audioManager.tuning = newValue }
+    }
     
     var displayChord: String {
         return detectedChord
@@ -20,7 +25,6 @@ class ChordDetectionViewModel: ObservableObject {
     private var lingerTimer: Timer?
     
     init() {
-        self.tuning = audioManager.tuning
         setupSubscriptions()
     }
     
@@ -33,20 +37,11 @@ class ChordDetectionViewModel: ObservableObject {
     }
     
     private func setupSubscriptions() {
-        // Sync tuning changes from UI back to AudioManager
-        $tuning
-            .dropFirst()
-            .sink { [weak self] newTuning in
-                self?.audioManager.tuning = newTuning
-            }
-            .store(in: &cancellables)
-            
-        // Sync tuning changes from AudioManager back to UI
+        // Forward tuning changes to the View
         audioManager.$tuning
-            .sink { [weak self] newTuning in
-                if self?.tuning != newTuning {
-                    self?.tuning = newTuning
-                }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
             }
             .store(in: &cancellables)
             

@@ -48,13 +48,9 @@ struct ChordDetectionView: View {
                     
                     Spacer()
                     
-                    Menu {
-                        Picker("Tuning", selection: $viewModel.tuning) {
-                            ForEach(Tuning.allCases, id: \.self) { tuning in
-                                Text(tuning.displayName).tag(tuning)
-                            }
-                        }
-                    } label: {
+                    Button(action: {
+                        viewModel.isShowingTuningSheet = true
+                    }) {
                         HStack(spacing: 4) {
                             Image(systemName: "tuningfork")
                             Text(viewModel.tuning.displayName)
@@ -65,6 +61,14 @@ struct ChordDetectionView: View {
                         .background(Color.white.opacity(0.1))
                         .cornerRadius(8)
                         .foregroundColor(.blue)
+                    }
+                    .confirmationDialog("Select Tuning", isPresented: $viewModel.isShowingTuningSheet, titleVisibility: .visible) {
+                        ForEach(Tuning.allCases, id: \.self) { tuning in
+                            Button(tuning.displayName) {
+                                viewModel.tuning = tuning
+                            }
+                        }
+                        Button("Cancel", role: .cancel) {}
                     }
                 }
                 .padding(.horizontal, 20)

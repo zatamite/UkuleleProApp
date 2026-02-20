@@ -40,8 +40,11 @@ class LogManager: ObservableObject {
             }
         }
         
-        // Also print to Xcode console
-        print("[\(source)] \(message)")
+        // Only print to Xcode console in release builds if it's an error.
+        // During debugging, only show higher level events, not raw spam.
+        if level == .error || level == .warning {
+            print("[\(source)] \(message)")
+        }
     }
     
     func clear() {

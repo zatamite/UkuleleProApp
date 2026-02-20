@@ -8,6 +8,7 @@ class TunerViewModel: ObservableObject {
     @Published var centsDeviation: Double = 0.0
     @Published var isRunning = false
     @Published var isStrobeMode = false
+    @Published var isShowingTuningSheet = false
     
     private var audioManager = AudioManager.shared
     private var cancellables = Set<AnyCancellable>()
@@ -31,6 +32,13 @@ class TunerViewModel: ObservableObject {
     }
     
     private func setupSubscriptions() {
+        audioManager.$tuning
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
         // Combined pipeline: Pitch + Amplitude
         audioManager.$currentFrequency
             .combineLatest(audioManager.$amplitude)
